@@ -1,3 +1,4 @@
+import sys
 import os
 import sqlite3
 import json
@@ -58,15 +59,15 @@ for user_id in top_users:
     # get song count info
     for i in range(100):
         title, version, mods, creator, rating = (
-            user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].strip("\"'"),
-            user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].strip("\"'"),
+            user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", "").replace('"', ""),
+            user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", "").replace('"', ""),
             user_data["allScoresBest"]["mania"][i]["mods"],
             user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
             user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
         )
         dt = ""
         if "DT" in mods or "NC" in mods:
-            dt = "dt"
+            dt = "DT"
 
         # add to database
         entry = c.execute(f"SELECT * FROM songs "
@@ -85,8 +86,8 @@ for user_id in top_users:
                       f"AND creator='{creator}'")
 
 # print out the table
-for row in c.execute("SELECT * FROM songs ORDER BY count DESC"):
-    print(row)
+# for row in c.execute("SELECT * FROM songs ORDER BY count DESC"):
+#     print(row)
 
 conn.commit()
 conn.close()
