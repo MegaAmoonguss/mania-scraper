@@ -16,14 +16,20 @@ c.execute("CREATE TABLE songs (title text, version text, mods text, creator text
 
 # get top users
 top_users = []
-for i in range(1, 61):
-    res = requests.get(f"https://osu.ppy.sh/p/pp/?m=3&s=3&o=1&f=&page={i}")
-    soup = bs4.BeautifulSoup(res.text, "html.parser")
-    table = soup.find_all("tr")
+with open("top3000.txt", "a+") as file:
+    for line in file.readlines():
+        link, name = line.split(",")
+        top_users.append((link, name))
 
-    for r in range(1, 51):
-        tag = table[r].find("a")
-        top_users.append((tag["href"], tag.contents[0]))
+    for i in range(1, 61):
+        res = requests.get(f"https://osu.ppy.sh/p/pp/?m=3&s=3&o=1&f=&page={i}")
+        soup = bs4.BeautifulSoup(res.text, "html.parser")
+        table = soup.find_all("tr")
+
+        for r in range(1, 51):
+            tag = table[r].find("a")
+            top_users.append((tag["href"], tag.contents[0]))
+            file.write(tag["href"] + "," + tag.contents[0] + "\n")
 
 # iterate through the users
 num = 1
