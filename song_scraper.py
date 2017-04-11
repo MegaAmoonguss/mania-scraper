@@ -57,13 +57,16 @@ for user_id in top_users:
 
     # get song count info
     for i in range(100):
-        title, version, mods, creator, rating = (
-            user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", " ").replace('"', " "),
-            user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", " ").replace('"', " "),
-            user_data["allScoresBest"]["mania"][i]["mods"],
-            user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
-            user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
-        )
+        try:
+            title, version, mods, creator, rating = (
+                user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", " ").replace('"', " "),
+                user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", " ").replace('"', " "),
+                user_data["allScoresBest"]["mania"][i]["mods"],
+                user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
+                user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
+            )
+        except IndexError:
+            break
         dt = ""
         if "DT" in mods or "NC" in mods:
             dt = "DT"
