@@ -1,4 +1,3 @@
-import sys
 import os
 import sqlite3
 import json
@@ -22,7 +21,7 @@ for i in range(1, 2):
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     table = soup.find_all("tr")
 
-    for r in range(1, 4):
+    for r in range(1, 6):
         tag = table[r].find("a")
         top_users.append((tag["href"], tag.contents[0]))
 
@@ -88,6 +87,7 @@ for user_id in top_users:
 # print out the table
 # for row in c.execute("SELECT * FROM songs ORDER BY count DESC"):
 #     print(row)
+print("Done!")
 
 conn.commit()
 conn.close()
