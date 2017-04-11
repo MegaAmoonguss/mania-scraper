@@ -4,4 +4,4 @@ __pycache__/
 .idea/
 test.py
 test.db
-songs.db-journal
+data/songs.db-journal
