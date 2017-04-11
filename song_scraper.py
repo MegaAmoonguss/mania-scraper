@@ -36,7 +36,7 @@ for user_id in top_users:
         # get saved data if it exists
         with open("users/" + user_id[1] + ".json") as file:
             user_data = json.load(file)
-            print(user_data)
+
     else:
         res = requests.get("https://new.ppy.sh" + user_id[0])
 
