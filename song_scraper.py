@@ -19,9 +19,9 @@ for i in range(1, 61):
     res = requests.get(f"https://osu.ppy.sh/p/pp/?m=3&s=3&o=1&f=&page={i}")
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     table = soup.find_all("tr")
-    
+
     for r in range(1, 51):
-        print(f"{rank}. " + table[r].find("a").contents[0])
+        print(f"{rank}. " + table[r].find("a")["href"])
         rank += 1
     
 # get user data

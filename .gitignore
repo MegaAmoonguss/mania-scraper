@@ -1,5 +1,6 @@
 __pycache__/
 .project
 .pydevproject
+.idea/
 test.py
 test.db
