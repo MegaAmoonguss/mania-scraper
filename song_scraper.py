@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import json
 import requests
@@ -21,31 +22,37 @@ for i in range(1, 2):
     table = soup.find_all("tr")
 
     for r in range(1, 4):
-        top_users.append(table[r].find("a")["href"])
+        tag = table[r].find("a")
+        top_users.append((tag["href"], tag.contents))
 
 # iterate through the users
 num = 1
-for link in top_users:
-    print(f"{num}. {link}")
+for user_id in top_users:
+    print(f"{num}. {user_id[1]}")
     num += 1
 
     # get user data
-    res = requests.get("https://new.ppy.sh" + link)
+    if os.path.isfile("users/" + user_id[1]):
+        # get saved data if it exists
+        with open("users/" + user_id[1]) as file:
+            user_data = file.read()
+    else:
+        res = requests.get("https://new.ppy.sh" + user_id[0])
 
-    user = ""
-    for i in res.text:
-        try:
-            user += i
-        except UnicodeEncodeError:
-            pass
+        user = ""
+        for i in res.text:
+            try:
+                user += i
+            except UnicodeEncodeError:
+                pass
 
-    soup = bs4.BeautifulSoup(user, "html.parser")
-    tag = soup.find("script", {"id": "json-user", "type": "application/json"})
-    user_data = json.loads(str(tag)[47:-9].strip())
+        soup = bs4.BeautifulSoup(user, "html.parser")
+        tag = soup.find("script", {"id": "json-user", "type": "application/json"})
+        user_data = json.loads(str(tag)[47:-9].strip())
 
-    # save user data
-    with open("users/" + user_data["username"] + ".json", "w") as file:
-        json.dump(user_data, file)
+        # save user data
+        with open("users/" + user_data["username"] + ".json", "w") as file:
+            json.dump(user_data, file)
 
     # get song count info
     for i in range(100):
