@@ -16,12 +16,12 @@ c.execute("CREATE TABLE songs (title text, version text, mods text, creator text
 
 # get top users
 top_users = []
-for i in range(1, 2):
+for i in range(1, 61):
     res = requests.get(f"https://osu.ppy.sh/p/pp/?m=3&s=3&o=1&f=&page={i}")
     soup = bs4.BeautifulSoup(res.text, "html.parser")
     table = soup.find_all("tr")
 
-    for r in range(1, 6):
+    for r in range(1, 51):
         tag = table[r].find("a")
         top_users.append((tag["href"], tag.contents[0]))
 
@@ -58,8 +58,8 @@ for user_id in top_users:
     # get song count info
     for i in range(100):
         title, version, mods, creator, rating = (
-            user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", "").replace('"', ""),
-            user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", "").replace('"', ""),
+            user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", " ").replace('"', " "),
+            user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", " ").replace('"', " "),
             user_data["allScoresBest"]["mania"][i]["mods"],
             user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
             user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
