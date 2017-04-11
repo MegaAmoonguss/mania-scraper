@@ -30,7 +30,7 @@ with open("data/top3000.txt") as file:
                 file.write(tag["href"] + "," + tag.contents[0] + "\n")
     else:
         for line in file.readlines():
-            link, name = line.split(",")
+            link, name = line.strip().split(",")
             top_users.append((link, name))
 
 # iterate through the users
