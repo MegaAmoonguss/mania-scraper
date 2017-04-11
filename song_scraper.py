@@ -23,7 +23,7 @@ for i in range(1, 2):
 
     for r in range(1, 4):
         tag = table[r].find("a")
-        top_users.append((tag["href"], tag.contents))
+        top_users.append((tag["href"], tag.contents[0]))
 
 # iterate through the users
 num = 1
@@ -32,10 +32,11 @@ for user_id in top_users:
     num += 1
 
     # get user data
-    if os.path.isfile("users/" + user_id[1]):
+    if os.path.isfile("users/" + user_id[1] + ".json"):
         # get saved data if it exists
-        with open("users/" + user_id[1]) as file:
-            user_data = file.read()
+        with open("users/" + user_id[1] + ".json") as file:
+            user_data = json.load(file)
+            print(user_data)
     else:
         res = requests.get("https://new.ppy.sh" + user_id[0])
 
@@ -57,23 +58,30 @@ for user_id in top_users:
     # get song count info
     for i in range(100):
         title, version, mods, creator, rating = (
-            user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", "").replace('"', ''),
-            user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", "").replace('"', ''),
+            user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].strip("\"'"),
+            user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].strip("\"'"),
             user_data["allScoresBest"]["mania"][i]["mods"],
             user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
             user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
         )
+        dt = ""
+        if "DT" in mods or "NC" in mods:
+            dt = "dt"
 
         # add to database
-        entry = c.execute(f"SELECT * FROM songs WHERE title='{title}' AND version='{version}'")
+        entry = c.execute(f"SELECT * FROM songs "
+                          f"WHERE title='{title}' "
+                          f"AND version='{version}' "
+                          f"AND mods='{dt}' "
+                          f"AND creator='{creator}'")
         if not entry.fetchall():
             c.execute(f"INSERT INTO songs "
-                      f"VALUES ('{title}', '{version}', '{' '.join(mods)}', '{creator}', {rating}, 1)")
+                      f"VALUES ('{title}', '{version}', '{dt}', '{creator}', {rating}, 1)")
         else:
             c.execute(f"UPDATE songs SET count = count + 1 "
                       f"WHERE title='{title}' "
                       f"AND version='{version}' "
-                      f"AND mods='{' '.join(mods)}' "
+                      f"AND mods='{dt}' "
                       f"AND creator='{creator}'")
 
 # print out the table
