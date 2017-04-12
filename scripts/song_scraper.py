@@ -80,6 +80,7 @@ try:
             dt = ""
             if "DT" in mods or "NC" in mods:
                 dt = "DT"
+            # TODO: recognize HT and EZ mods, retake all data, may force to take all in one go
 
             # add to database
             entry = c.execute(f"SELECT * FROM songs "
