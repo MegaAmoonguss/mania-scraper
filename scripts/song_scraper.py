@@ -8,11 +8,11 @@ import bs4
 conn = sqlite3.connect("data/songs.db")
 c = conn.cursor()
 
-try:
-    c.execute("DROP TABLE songs")
-except sqlite3.OperationalError:
-    pass
-c.execute("CREATE TABLE songs (title text, version text, mods text, creator text, rating float, count integer)")
+# try:
+#     c.execute("DROP TABLE songs")
+# except sqlite3.OperationalError:
+#     pass
+# c.execute("CREATE TABLE songs (title text, version text, mods text, creator text, rating float, count integer)")
 
 # get top users
 # NOTE: will not work if file does not exist
@@ -34,10 +34,10 @@ with open("data/top3000.txt") as file:
             top_users.append((link, name))
 
 # iterate through the users
-num = 1
+index = 0
 for user_id in top_users:
-    print(f"{num}. {user_id[1]}")
-    num += 1
+    print(f"{index}. {user_id[1]}")
+    index += 1
 
     # get user data
     if os.path.isfile("users/" + user_id[1] + ".json"):
@@ -94,6 +94,10 @@ for user_id in top_users:
                       f"AND version='{version}' "
                       f"AND mods='{dt}' "
                       f"AND creator='{creator}'")
+
+    with open("data/top3000.txt", "w") as file:
+        csv = [",".join(line) for line in top_users[index + 1:]]
+        file.write("\n".join(csv))
 
 # print out the table
 # for row in c.execute("SELECT * FROM songs ORDER BY count DESC"):
