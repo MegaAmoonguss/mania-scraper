@@ -5,7 +5,7 @@ import requests
 import bs4
 
 # initiate database connection
-conn = sqlite3.connect("data/songs.db")
+conn = sqlite3.connect("../data/songs.db")
 c = conn.cursor()
 
 # try:
@@ -17,87 +17,91 @@ c = conn.cursor()
 # get top users
 # NOTE: will not work if file does not exist
 top_users = []
-with open("data/top3000.txt") as file:
-    if not file.read(1):
-        for i in range(1, 61):
-            res = requests.get(f"https://osu.ppy.sh/p/pp/?m=3&s=3&o=1&f=&page={i}")
-            soup = bs4.BeautifulSoup(res.text, "html.parser")
-            table = soup.find_all("tr")
+with open("../data/top3000.txt") as file:
+    # if list needs to be generated
+    # for i in range(1, 61):
+    #     res = requests.get(f"https://osu.ppy.sh/p/pp/?m=3&s=3&o=1&f=&page={i}")
+    #     soup = bs4.BeautifulSoup(res.text, "html.parser")
+    #     table = soup.find_all("tr")
 
-            for r in range(1, 51):
-                tag = table[r].find("a")
-                top_users.append((tag["href"], tag.contents[0]))
-                file.write(tag["href"] + "," + tag.contents[0] + "\n")
-    else:
-        for line in file.readlines():
-            link, name = line.strip().split(",")
-            top_users.append((link, name))
+    #     for r in range(1, 51):
+    #         tag = table[r].find("a")
+    #         top_users.append((tag["href"], tag.contents[0]))
+    #         file.write(tag["href"] + "," + tag.contents[0] + "\n")
 
-# iterate through the users
-index = 0
-for user_id in top_users:
-    print(f"{index}. {user_id[1]}")
-    index += 1
+    # parse existing file
+    for line in file.readlines():
+        link, name = line.rstrip().split(",")
+        top_users.append((link, name))
 
-    # get user data
-    if os.path.isfile("users/" + user_id[1] + ".json"):
-        # get saved data if it exists
-        with open("users/" + user_id[1] + ".json") as file:
-            user_data = json.load(file)
+try:
+    # iterate through the users
+    index = 0
+    for user_id in top_users:
+        print(f"{index}. {user_id[1]}")
+        index += 1
 
-    else:
-        res = requests.get("https://new.ppy.sh" + user_id[0])
+        # get user data
+        if os.path.isfile("../users/" + user_id[1] + ".json"):
+            # get saved data if it exists
+            with open("../users/" + user_id[1] + ".json") as file:
+                user_data = json.load(file)
 
-        user = ""
-        for i in res.text:
+        else:
+            res = requests.get("https://new.ppy.sh" + user_id[0])
+
+            user = ""
+            for i in res.text:
+                try:
+                    user += i
+                except UnicodeEncodeError:
+                    pass
+
+            soup = bs4.BeautifulSoup(user, "html.parser")
+            tag = soup.find("script", {"id": "json-user", "type": "application/json"})
+            user_data = json.loads(str(tag)[47:-9].strip())
+
+            # save user data
+            with open("../users/" + user_data["username"] + ".json", "w") as file:
+                json.dump(user_data, file)
+
+        # get song count info
+        for i in range(100):
             try:
-                user += i
-            except UnicodeEncodeError:
-                pass
+                title, version, mods, creator, rating = (
+                    user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", " ").replace('"', " "),
+                    user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", " ").replace('"', " "),
+                    user_data["allScoresBest"]["mania"][i]["mods"],
+                    user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
+                    user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
+                )
+            except IndexError:
+                break
+            dt = ""
+            if "DT" in mods or "NC" in mods:
+                dt = "DT"
 
-        soup = bs4.BeautifulSoup(user, "html.parser")
-        tag = soup.find("script", {"id": "json-user", "type": "application/json"})
-        user_data = json.loads(str(tag)[47:-9].strip())
-
-        # save user data
-        with open("users/" + user_data["username"] + ".json", "w") as file:
-            json.dump(user_data, file)
-
-    # get song count info
-    for i in range(100):
-        try:
-            title, version, mods, creator, rating = (
-                user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", " ").replace('"', " "),
-                user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", " ").replace('"', " "),
-                user_data["allScoresBest"]["mania"][i]["mods"],
-                user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
-                user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
-            )
-        except IndexError:
-            break
-        dt = ""
-        if "DT" in mods or "NC" in mods:
-            dt = "DT"
-
-        # add to database
-        entry = c.execute(f"SELECT * FROM songs "
+            # add to database
+            entry = c.execute(f"SELECT * FROM songs "
+                              f"WHERE title='{title}' "
+                              f"AND version='{version}' "
+                              f"AND mods='{dt}' "
+                              f"AND creator='{creator}'")
+            if not entry.fetchall():
+                c.execute(f"INSERT INTO songs "
+                          f"VALUES ('{title}', '{version}', '{dt}', '{creator}', {rating}, 1)")
+            else:
+                c.execute(f"UPDATE songs SET count = count + 1 "
                           f"WHERE title='{title}' "
                           f"AND version='{version}' "
                           f"AND mods='{dt}' "
                           f"AND creator='{creator}'")
-        if not entry.fetchall():
-            c.execute(f"INSERT INTO songs "
-                      f"VALUES ('{title}', '{version}', '{dt}', '{creator}', {rating}, 1)")
-        else:
-            c.execute(f"UPDATE songs SET count = count + 1 "
-                      f"WHERE title='{title}' "
-                      f"AND version='{version}' "
-                      f"AND mods='{dt}' "
-                      f"AND creator='{creator}'")
 
-    with open("data/top3000.txt", "w") as file:
-        csv = [",".join(line) for line in top_users[index + 1:]]
-        file.write("\n".join(csv))
+        with open("../data/top3000.txt", "w") as file:
+            csv = [",".join(line) for line in top_users[index + 1:]]
+            file.write("\n".join(csv))
+except KeyboardInterrupt:
+    pass
 
 # print out the table
 # for row in c.execute("SELECT * FROM songs ORDER BY count DESC"):
