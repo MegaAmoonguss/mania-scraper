@@ -5,3 +5,4 @@ __pycache__/
 test.py
 test.db
 data/songs.db-journal
+users/
