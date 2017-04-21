@@ -77,10 +77,13 @@ try:
                 )
             except IndexError:
                 break
-            dt = ""
-            if "DT" in mods or "NC" in mods:
-                dt = "DT"
-            # TODO: recognize HT and EZ mods, retake all data, may force to take all in one go
+
+            if "HD" in mods:
+                del mods[mods.index("HD")]
+            if "FL" in mods:
+                del mods[mods.index("FL")]
+            if "NC" in mods:
+                mods[mods.index("NC")] = "DT"
 
             # add to database
             entry = c.execute(f"SELECT * FROM songs "
@@ -102,6 +105,7 @@ try:
             csv = [",".join(line) for line in top_users[index + 1:]]
             file.write("\n".join(csv))
 except KeyboardInterrupt:
+    # NOTE: while this will technically work even if you interrupt, some data will be duplicated, not recommended
     pass
 
 # print out the table
