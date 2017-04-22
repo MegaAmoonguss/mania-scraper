@@ -86,6 +86,8 @@ try:
                 del mods[mods.index("HD")]
             if "FL" in mods:
                 del mods[mods.index("FL")]
+            if "FI" in mods:
+                del mods[mods.index("FI")]
             if "NC" in mods:
                 mods[mods.index("NC")] = "DT"
             if "SD" in mods:
