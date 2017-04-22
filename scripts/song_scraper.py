@@ -92,6 +92,9 @@ try:
                 del mods[mods.index("SD")]
             if "PF" in mods:
                 del mods[mods.index("PF")]
+            for k in range(1, 10):
+                if "%dK" % k in mods:
+                    del mods[mods.index("%dK" % k)]
 
             # add to database
             entry = c.execute(f"SELECT * FROM songs "
