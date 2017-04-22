@@ -5,19 +5,19 @@ import requests
 import bs4
 
 # initiate database connection
-conn = sqlite3.connect("../data/songs.db")
+conn = sqlite3.connect("./data/songs.db")
 c = conn.cursor()
 
-# try:
-#     c.execute("DROP TABLE songs")
-# except sqlite3.OperationalError:
-#     pass
-# c.execute("CREATE TABLE songs (title text, version text, mods text, creator text, rating float, count integer)")
+try:
+    c.execute("DROP TABLE songs")
+except sqlite3.OperationalError:
+    pass
+c.execute("CREATE TABLE songs (title text, version text, mods text, creator text, rating float, count integer)")
 
 # get top users
 # NOTE: will not work if file does not exist
 top_users = []
-with open("../data/top3000.txt") as file:
+with open("./data/top3000.txt") as file:
     # if list needs to be generated
     # for i in range(1, 61):
     #     res = requests.get(f"https://osu.ppy.sh/p/pp/?m=3&s=3&o=1&f=&page={i}")
@@ -42,9 +42,9 @@ try:
         index += 1
 
         # get user data
-        if os.path.isfile("../users/" + user_id[1] + ".json"):
+        if os.path.isfile("./users/" + user_id[1] + ".json"):
             # get saved data if it exists
-            with open("../users/" + user_id[1] + ".json") as file:
+            with open("./users/" + user_id[1] + ".json") as file:
                 user_data = json.load(file)
 
         else:
@@ -59,10 +59,14 @@ try:
 
             soup = bs4.BeautifulSoup(user, "html.parser")
             tag = soup.find("script", {"id": "json-user", "type": "application/json"})
-            user_data = json.loads(str(tag)[47:-9].strip())
+            try:
+                user_data = json.loads(str(tag)[47:-9].strip())
+            except json.JSONDecodeError:
+                print("JSONDecodeError encountered! Skipping")
+                continue
 
             # save user data
-            with open("../users/" + user_data["username"] + ".json", "w") as file:
+            with open("./users/" + user_data["username"] + ".json", "w") as file:
                 json.dump(user_data, file)
 
         # get song count info
@@ -72,7 +76,7 @@ try:
                     user_data["allScoresBest"]["mania"][i]["beatmapset"]["title"].replace("'", " ").replace('"', " "),
                     user_data["allScoresBest"]["mania"][i]["beatmap"]["version"].replace("'", " ").replace('"', " "),
                     user_data["allScoresBest"]["mania"][i]["mods"],
-                    user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"],
+                    user_data["allScoresBest"]["mania"][i]["beatmapset"]["creator"].replace("'", " ").replace('"', " "),
                     user_data["allScoresBest"]["mania"][i]["beatmap"]["difficulty_rating"]
                 )
             except IndexError:
@@ -84,26 +88,31 @@ try:
                 del mods[mods.index("FL")]
             if "NC" in mods:
                 mods[mods.index("NC")] = "DT"
+            if "SD" in mods:
+                del mods[mods.index("SD")]
+            if "PF" in mods:
+                del mods[mods.index("PF")]
 
             # add to database
             entry = c.execute(f"SELECT * FROM songs "
                               f"WHERE title='{title}' "
                               f"AND version='{version}' "
-                              f"AND mods='{dt}' "
+                              f"AND mods='{' '.join(mods)}' "
                               f"AND creator='{creator}'")
             if not entry.fetchall():
                 c.execute(f"INSERT INTO songs "
-                          f"VALUES ('{title}', '{version}', '{dt}', '{creator}', {rating}, 1)")
+                          f"VALUES ('{title}', '{version}', '{' '.join(mods)}', '{creator}', {rating}, 1)")
             else:
                 c.execute(f"UPDATE songs SET count = count + 1 "
                           f"WHERE title='{title}' "
                           f"AND version='{version}' "
-                          f"AND mods='{dt}' "
+                          f"AND mods='{' '.join(mods)}' "
                           f"AND creator='{creator}'")
 
-        with open("../data/top3000.txt", "w") as file:
-            csv = [",".join(line) for line in top_users[index + 1:]]
-            file.write("\n".join(csv))
+        # delete line in top3000.txt
+        # with open("./data/top3000.txt", "w") as file:
+        #     csv = [",".join(line) for line in top_users[index + 1:]]
+        #     file.write("\n".join(csv))
 except KeyboardInterrupt:
     # NOTE: while this will technically work even if you interrupt, some data will be duplicated, not recommended
     pass
