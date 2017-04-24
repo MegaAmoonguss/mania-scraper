@@ -55,6 +55,7 @@ for key in graph_data:
     xvals.append(graph_data[key][0])
     yvals.append(graph_data[key][1])
 
+print(graph_data)
 plt.plot(xvals, yvals, 'o')
 plt.axis([4.5, 7, 500000, 1000000])
 plt.show()
