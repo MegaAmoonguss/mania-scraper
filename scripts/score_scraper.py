@@ -23,15 +23,17 @@ song_list = [
     ["Space Time (Amane Hardcore Remix)", "Spy s 4K Extra", []],
 ]
 
+data = {}
+for song in song_list:
+    data[f"{song[0]} [{song[1]}]"] = []
+
 with open("../data/working_users.txt") as file:
     working_users = eval(file.read())
 
-data = {}
 for user in working_users:
     with open(f"../users/{user}.json") as file:
         user_data = json.load(file)
 
-    data[user] = {}
     for i in range(100):
         try:
             current_song = [
@@ -43,7 +45,7 @@ for user in working_users:
             break
 
         if current_song in song_list:
-            data[user][f"{current_song[0]} [{current_song[1]}]"] = user_data["allScoresBest"]["mania"][i]["score"]
+            data[f"{current_song[0]} [{current_song[1]}]"].append(user_data["allScoresBest"]["mania"][i]["score"])
 
 with open("../data/scores.json", 'w') as file:
     json.dump(data, file)
