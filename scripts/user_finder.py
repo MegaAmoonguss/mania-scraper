@@ -43,12 +43,11 @@ for file in os.listdir("../users/"):
     user_works = True
     for song in song_list:
         if song not in songs:
-            print(song)
             user_works = False
             break
 
     if user_works:
-        working_users.append(file)
+        working_users.append(file[:-5])
 
 print(working_users)
 with open("../data/working_users.txt", 'w') as file:
