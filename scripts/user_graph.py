@@ -25,8 +25,12 @@ for i in range(100):
     except IndexError:
         break
 
-    if not current_song[2]:
-        songs.append(current_song)
+    if "HT" in current_song[2]:
+        current_song[3] *= 0.795
+    elif "DT" in current_song[2] or "NC" in current_song[2]:
+        current_song[3] *= 1.38
+
+    songs.append(current_song)
 
 xvals = []
 yvals = []
@@ -35,5 +39,5 @@ for song in songs:
     yvals.append(song[4])
 
 plt.plot(xvals, yvals, 'o')
-plt.axis([4.4, 7, 500000, 1000000])
+plt.axis([4.4, 7.1, 500000, 1000000])
 plt.show()
