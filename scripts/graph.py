@@ -1,5 +1,7 @@
 import json
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import scipy.stats
 
 song_list = [
     ["Speedcore 300", "Extra", []],
@@ -49,13 +51,25 @@ graph_data = {}
 for key in data:
     graph_data[key] = [ratings[key], sum(data[key]) / len(data[key])]
 
-xvals = []
-yvals = []
+x = []
+y = []
 for key in graph_data:
-    xvals.append(graph_data[key][0])
-    yvals.append(graph_data[key][1])
+    x.append(graph_data[key][0])
+    y.append(graph_data[key][1] / 1000)
 
-print(graph_data)
-plt.plot(xvals, yvals, 'o')
-plt.axis([4.5, 7, 500000, 1000000])
+slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
+
+plt.rc("grid", linestyle="--")
+plt.scatter(x, y)
+plt.plot([0, 12], [intercept, slope * 12 + intercept], 'r')
+plt.axis([4.5, 7, 500, 1000])
+
+plt.title(f"Top 20 Most Commonly Ranked")
+plt.xlabel("Difficulty Rating (stars)")
+plt.ylabel("Score / 1000")
+
+plt.grid(True)
+red_patch = mpatches.Patch(color='r', label=f"Best fit line\nr^2 = {r_value**2}")
+plt.legend(handles=[red_patch])
+
 plt.show()
