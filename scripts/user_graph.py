@@ -16,6 +16,8 @@ except FileNotFoundError:
 
 songs = []
 
+min_diff = 15
+max_diff = 0
 for i in range(100):
     try:
         current_song = [
@@ -36,6 +38,11 @@ for i in range(100):
     if current_song[0] == "Pipe Dream" and current_song[1] == "Insane" and current_song[2] == ["8K", "DT"]:
         current_song[3] = 8.72
 
+    if current_song[3] < min_diff:
+        min_diff = current_song[3]
+    elif current_song[3] > max_diff:
+        max_diff = current_song[3]
+
     songs.append(current_song)
 
 x = []
@@ -51,7 +58,7 @@ y_bestfit = np.linspace(intercept, slope * 11 + intercept, num=50)
 plt.rc("grid", linestyle="--")
 plt.scatter(x, y)
 plt.plot(x_bestfit, y_bestfit, 'r')
-plt.axis([6, 11, 500, 1000])
+plt.axis([min_diff - 0.1, max_diff + 0.1, 500, 1000])
 
 plt.title(f"Profile Data for {username}")
 plt.xlabel("Difficulty Rating (stars)")
