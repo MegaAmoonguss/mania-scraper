@@ -35,8 +35,6 @@ for i in range(100):
         current_song[4] *= 2
     elif "DT" in current_song[2] or "NC" in current_song[2]:
         current_song[3] *= 1.38
-    if "EZ" in current_song[2]:
-        current_song[4] *= 2
     if current_song[0] == "Pipe Dream" and current_song[1] == "Insane" and current_song[2] == ["8K", "DT"]:
         current_song[3] = 8.72
 
@@ -45,7 +43,8 @@ for i in range(100):
     elif current_song[3] > max_diff:
         max_diff = current_song[3]
 
-    songs.append(current_song)
+    if "EZ" not in current_song[2]:
+        songs.append(current_song)
 
 x = []
 y = []
@@ -54,8 +53,8 @@ for song in songs:
     y.append(song[4] / 1000)
 
 slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
-x_bestfit = np.linspace(0, 12, num=50)
-y_bestfit = np.linspace(intercept, slope * 11 + intercept, num=50)
+x_bestfit = np.linspace(0, 12, num=2)
+y_bestfit = np.linspace(intercept, slope * 11 + intercept, num=2)
 
 plt.rc("grid", linestyle="--")
 plt.scatter(x, y)
