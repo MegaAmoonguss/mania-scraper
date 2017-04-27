@@ -33,6 +33,8 @@ for i in range(100):
         current_song[4] *= 2
     elif "DT" in current_song[2] or "NC" in current_song[2]:
         current_song[3] *= 1.38
+    if current_song[0] == "Pipe Dream" and current_song[1] == "Insane" and current_song[2] == ["8K", "DT"]:
+        current_song[3] = 8.72
 
     songs.append(current_song)
 
@@ -49,7 +51,7 @@ y_bestfit = np.linspace(intercept, slope * 11 + intercept, num=50)
 plt.rc("grid", linestyle="--")
 plt.scatter(x, y)
 plt.plot(x_bestfit, y_bestfit, 'r')
-plt.axis([4.4, 7.1, 500, 1000])
+plt.axis([6, 11, 500, 1000])
 
 plt.title(f"Profile Data for {username}")
 plt.xlabel("Difficulty Rating (stars)")
