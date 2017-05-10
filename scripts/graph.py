@@ -62,7 +62,9 @@ slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
 # y_resid = []
 # for (x_val, y_val) in zip(x, y):
 #     resid = y_val - ((slope * x_val) + intercept)
-#    y_resid.append(resid)
+#     y_resid.append(resid)
+
+# slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y_resid)
 
 plt.rc("grid", linestyle="--")
 plt.scatter(x, y)
