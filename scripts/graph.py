@@ -59,14 +59,23 @@ for key in graph_data:
 
 slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
 
+# y_resid = []
+# for (x_val, y_val) in zip(x, y):
+#     resid = y_val - ((slope * x_val) + intercept)
+#    y_resid.append(resid)
+
 plt.rc("grid", linestyle="--")
 plt.scatter(x, y)
+# plt.scatter(x, y_resid)
 plt.plot([0, 12], [intercept, slope * 12 + intercept], 'r')
 plt.axis([4.5, 7, 500, 1000])
+# plt.axis([4.5, 7, 150, -150])
 
-plt.title(f"Top 20 Most Commonly Ranked")
+plt.title("Top 20 Most Commonly Ranked")
+# plt.title("Common Ranked Plays Residuals")
 plt.xlabel("Difficulty Rating (stars)")
 plt.ylabel("Score / 1000")
+# plt.ylabel("Residual (Score / 1000)")
 
 plt.grid(True)
 red_patch = mpatches.Patch(color='r', label=f"Best fit line\nr^2 = {r_value**2}")
